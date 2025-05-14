@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Assigned Tickets</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .comments { margin-top: 10px; }
+        .comment { border-top: 1px solid #eee; padding: 5px 0; }
+    </style>
+</head>
+<body>
+    <h2>My Assigned Tickets</h2>
+    <a href="{% url 'assign_tickets' %}">Assign More Tickets</a> | <a href="{% url 'home' %}">Home</a>
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: {% if message.tags == 'success' %}green{% elif message.tags == 'info' %}blue{% else %}red{% endif %};">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    {% if tickets %}
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+            {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.name }}</td>
+                    <td>{{ ticket.category.name }}</td>
+                    <td>{{ ticket.priority }}</td>
+                    <td>{{ ticket.state }}</td>
+                    <td>{{ ticket.creation_date|date:"Y-m-d H:i" }}</td>
+                    <td>
+                        {% if ticket.state in 'open,in_progress' %}
+                            <a href="{% url 'resolve_ticket' ticket.id %}">Resolve</a> |
+                        {% endif %}
+                        <a href="{% url 'add_comment' ticket.id %}">Add Comment</a> |
+                        <a href="{% url 'unassign_ticket' ticket.id %}">Unassign</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" class="comments">
+                        {% for comment in ticket.comments.all %}
+                            <div class="comment">
+                                <strong>{{ comment.agent.username }} ({{ comment.created_at|date:"Y-m-d H:i" }}):</strong>
+                                {{ comment.comment }}
+                            </div>
+                        {% empty %}
+                            <div class="comment">No comments yet.</div>
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No assigned tickets.</p>
+    {% endif %}
+</body>
+</html>

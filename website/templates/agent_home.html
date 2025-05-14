@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agent Home</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; }
+        .links { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        a { color: #007bff; text-decoration: none; font-size: 18px; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Agent Home</h1>
+    <div class="links">
+        <a href="{% url 'agent_dashboard' %}">View Agent Dashboard</a>
+        <a href="{% url 'assign_tickets' %}">Assign Tickets</a>
+        <a href="{% url 'agent_tickets' %}">View My Assigned Tickets</a>
+        <a href="{% url 'my_tickets' %}">View My Created Tickets</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+</body>
+</html>

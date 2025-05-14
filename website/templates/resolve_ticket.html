@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resolve Ticket</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .ticket-details { max-width: 600px; margin: auto; }
+        .ticket-details p { margin: 10px 0; }
+        form { margin-top: 20px; }
+        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        a { color: #007bff; PTSans; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resolve-btn { padding: 5px 10px; background-color: #28a745; color: white; border: none; cursor: pointer; text-decoration: none; display: inline-block; }
+        .resolve-btn:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+    <h2>Resolve Ticket: {{ ticket.name }}</h2>
+    <div class="ticket-details">
+        <p><strong>Category:</strong> {{ ticket.category.name }}</p>
+        <p><strong>Priority:</strong> {{ ticket.priority }}</p>
+        <p><strong>State:</strong> {{ ticket.state }}</p>
+        <p><strong>User:</strong> {{ ticket.user.username }}</p>
+        <p><strong>Created:</strong> {{ ticket.creation_date|date:"Y-m-d H:i" }}</p>
+        <p><strong>Description:</strong> {{ ticket.description }}</p>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirm Resolution</button>
+    </form>
+    <a href="{% url 'agent_tickets' %}">Back to My Assigned Tickets</a>
+</body>
+</html>

@@ -1,0 +1,12 @@
+- model: website.Category
+  pk: 1
+  fields:
+    name: Technical
+- model: website.Category
+  pk: 2
+  fields:
+    name: Billing
+- model: website.Category
+  pk: 3
+  fields:
+    name: General Inquiry

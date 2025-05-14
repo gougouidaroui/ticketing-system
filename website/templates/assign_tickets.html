@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assign Tickets</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h2>Unassigned Tickets</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>State</th>
+                <th>User</th>
+                <th>Creation Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.name }}</td>
+                    <td>{{ ticket.category.name }}</td>
+                    <td>{{ ticket.priority }}</td>
+                    <td>{{ ticket.state }}</td>
+                    <td>{{ ticket.user.username }}</td>
+                    <td>{{ ticket.creation_date|date:"Y-m-d H:i" }}</td>
+                    <td><a href="{% url 'assign_ticket' ticket.id %}">Take Ticket</a></td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7">No unassigned tickets.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

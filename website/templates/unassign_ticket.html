@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unassign Ticket</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-container { max-width: 600px; margin: auto; }
+        form { display: flex; flex-direction: column; gap: 10px; }
+        button { padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Unassign Ticket: {{ ticket.name }}</h2>
+        <p>Are you sure you want to unassign this ticket?</p>
+        {% if messages %}
+            {% for message in messages %}
+                <p style="color: {% if message.tags == 'success' %}green{% else %}red{% endif %};">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">Unassign Ticket</button>
+        </form>
+        <a href="{% url 'agent_tickets' %}">Back to My Assigned Tickets</a>
+    </div>
+</body>
+</html>

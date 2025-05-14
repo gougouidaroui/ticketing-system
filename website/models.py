@@ -16,12 +16,11 @@ class CustomUser(AbstractUser):
         validators=[phone_regex],
         blank=False,
         null=False,
-        unique=True  # Ensure phone numbers are unique
+        unique=True
     )
 
     def __str__(self):
         return self.username
-
 
 @receiver(post_delete)
 def delete_files_when_row_deleted_from_db(sender, instance, **kwargs):
@@ -30,10 +29,8 @@ def delete_files_when_row_deleted_from_db(sender, instance, **kwargs):
             instance_file_field = getattr(instance, field.name)
             delete_file_if_unused(sender, instance, field, instance_file_field)
 
-
 @receiver(pre_save)
 def delete_files_when_file_changed(sender, instance, **kwargs):
-    # Don't run on initial save
     if not instance.pk:
         return
     for field in sender._meta.concrete_fields:
@@ -94,29 +91,3 @@ class TicketComment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.agent.username} on {self.ticket.name}"
-
-# model example
-#
-# class ModelName(models.Model):
-#     name = models.CharField(max_length=100)
-#     image = models.ImageField(upload_to='images/')
-#     description = models.TextField()
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     date = models.DateField()
-#
-#     def save(self, *args, **kwargs):
-#         self.image.name = self.image.name.replace(' ', '_')
-#         super().save(*args, **kwargs)
-#
-#
-#
-#
-# add to classes where u need to return a value in the front end as a string
-#     def __str__(self):
-#         return self.name
-#
-#
-# add to a class that has a image in it to not mess up the file in the import
-#     def save(self, *args, **kwargs):
-#         self.image.name = self.image.name.replace(' ', '_')
-#         super().save(*args, **kwargs)

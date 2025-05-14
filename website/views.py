@@ -16,10 +16,6 @@ from django.db.models.functions import TruncDate
 import os
 from django.conf import settings
 
-# use this import if u need to force the user to login to use the page add @login_required a line before your function
-# from django.contrib.auth.decorators import login_required
-# use this import if u need to limit access to admins only to use the page add @staff_member_required one line before your function
-# from django.contrib.admin.views.decorators import staff_member_required
 
 def is_agent(user):
     return user.groups.filter(name__in=['Technical Agents', 'HR Agents', 'Consultants']).exists()
@@ -182,7 +178,7 @@ def resolve_ticket(request, ticket_id):
     if not is_agent(request.user) and not request.user.is_superuser:
         messages.error(request, "Only agents or admins can resolve tickets.")
         return redirect('ticket_list')
-    ticket = get_object_or_404(Ticket, id=ticket_id, assigned_agent=request.user, state__in=['open', 'in_progress'])
+    ticket = get_object_or_404(Ticket, id=ticket_id, state__in=['open', 'in_progress'])
     if request.method == 'POST':
         ticket.state = 'closed'
         ticket.resolution_date = timezone.now()
@@ -198,18 +194,15 @@ def ticket_list(request):
         messages.error(request, "Only admins can view all tickets.")
         return redirect('home')
 
-    # Initialize form with GET data
     form = TicketFilterForm(request.GET or None)
     tickets = Ticket.objects.all().select_related('category', 'user', 'assigned_agent')
 
-    # Apply filters
     if form.is_valid():
         if form.cleaned_data['priority']:
             tickets = tickets.filter(priority=form.cleaned_data['priority'])
         if form.cleaned_data['state']:
             tickets = tickets.filter(state=form.cleaned_data['state'])
 
-    # Apply sorting
     sort_by = request.GET.get('sort_by', '-creation_date')
     allowed_sort_fields = ['state', '-state', 'priority', '-priority']
     if sort_by in allowed_sort_fields:
@@ -367,7 +360,6 @@ def agent_dashboard(request):
         plt.close()
     generate_chart_if_needed(bar_chart_path, generate_bar_chart)
 
-    # Average Resolution Time
     resolved_tickets = Ticket.objects.filter(assigned_agent=request.user, state='closed', resolution_date__isnull=False)
     avg_hours = 0
     if resolved_tickets.exists():
@@ -391,7 +383,6 @@ def add_comment(request, ticket_id):
     if not is_agent(request.user) and not request.user.is_superuser:
         messages.error(request, "Only agents or admins can add comments.")
         return redirect('ticket_list')
-    # Superusers can comment on any ticket; agents only on their assigned tickets
     if request.user.is_superuser:
         ticket = get_object_or_404(Ticket, id=ticket_id)
     else:
@@ -414,13 +405,11 @@ def unassign_ticket(request, ticket_id):
     if not is_agent(request.user) and not request.user.is_superuser:
         messages.error(request, "Only agents or admins can unassign tickets.")
         return redirect('ticket_list')
-    ticket = get_object_or_404(Ticket, id=ticket_id, assigned_agent=request.user)
+    ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
         ticket.assigned_agent = None
         ticket.state = 'open'
         ticket.save()
         messages.success(request, f"You have unassigned ticket '{ticket.name}'.")
-        messages.info(request, f"Your ticket '{ticket.name}' is unassigned and open for reassignment.", extra_tags=f'for_user_{ticket.user.id}')
         return redirect('agent_tickets')
     return render(request, 'unassign_ticket.html', {'ticket': ticket})
-

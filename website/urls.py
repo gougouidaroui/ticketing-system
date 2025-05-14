@@ -28,8 +28,4 @@ urlpatterns = [
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-#     # path for views that need a id replace name_view with the name of the views function
-#     path('name_view/<int:instance_id>', views.name_view, name='name_view')

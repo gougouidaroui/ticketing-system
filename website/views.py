@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
-from .forms import SignUpForm, LoginForm, TicketForm, AssignTicketForm, TicketCommentForm
+from .forms import SignUpForm, LoginForm, TicketForm, AssignTicketForm, TicketCommentForm, TicketFilterForm
 from .models import Ticket
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -155,8 +155,27 @@ def agent_tickets(request):
     if not is_agent(request.user) and not request.user.is_superuser:
         messages.error(request, "Only agents or admins can view assigned tickets.")
         return redirect('ticket_list')
-    tickets = Ticket.objects.filter(assigned_agent=request.user)
-    return render(request, 'agent_tickets.html', {'tickets': tickets})
+
+    # Initialize form with GET data
+    form = TicketFilterForm(request.GET or None)
+    tickets = Ticket.objects.filter(assigned_agent=request.user).select_related('category', 'user', 'assigned_agent')
+
+    # Apply filters
+    if form.is_valid():
+        if form.cleaned_data['priority']:
+            tickets = tickets.filter(priority=form.cleaned_data['priority'])
+        if form.cleaned_data['state']:
+            tickets = tickets.filter(state=form.cleaned_data['state'])
+
+    # Apply sorting
+    sort_by = request.GET.get('sort_by', '-creation_date')
+    allowed_sort_fields = ['state', '-state', 'priority', '-priority']
+    if sort_by in allowed_sort_fields:
+        tickets = tickets.order_by(sort_by)
+    else:
+        tickets = tickets.order_by('-creation_date')  # Default sort
+
+    return render(request, 'agent_tickets.html', {'tickets': tickets, 'form': form})
 
 @login_required
 def resolve_ticket(request, ticket_id):
@@ -175,11 +194,30 @@ def resolve_ticket(request, ticket_id):
 
 @login_required
 def ticket_list(request):
-    if not (is_agent(request.user) or request.user.is_superuser):
-        messages.error(request, "Only agents or admins can view all tickets.")
-        return redirect('my_tickets')
-    tickets = Ticket.objects.all()
-    return render(request, 'tickets.html', {'tickets': tickets})
+    if not request.user.is_superuser:
+        messages.error(request, "Only admins can view all tickets.")
+        return redirect('home')
+
+    # Initialize form with GET data
+    form = TicketFilterForm(request.GET or None)
+    tickets = Ticket.objects.all().select_related('category', 'user', 'assigned_agent')
+
+    # Apply filters
+    if form.is_valid():
+        if form.cleaned_data['priority']:
+            tickets = tickets.filter(priority=form.cleaned_data['priority'])
+        if form.cleaned_data['state']:
+            tickets = tickets.filter(state=form.cleaned_data['state'])
+
+    # Apply sorting
+    sort_by = request.GET.get('sort_by', '-creation_date')
+    allowed_sort_fields = ['state', '-state', 'priority', '-priority']
+    if sort_by in allowed_sort_fields:
+        tickets = tickets.order_by(sort_by)
+    else:
+        tickets = tickets.order_by('-creation_date')  # Default sort
+
+    return render(request, 'tickets.html', {'tickets': tickets, 'form': form})
 
 @login_required
 def admin_dashboard(request):

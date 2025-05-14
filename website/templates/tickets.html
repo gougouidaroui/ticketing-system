@@ -15,6 +15,10 @@
         a:hover { text-decoration: underline; }
         .comments { margin-top: 10px; }
         .comment { border-top: 1px solid #eee; padding: 5px 0; }
+        .filter-form { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        .filter-form select { padding: 5px; }
+        .filter-form button { padding: 5px 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        .filter-form button:hover { background-color: #0056b3; }
     </style>
     {% load bootstrap5 %}
     {% bootstrap_css %}
@@ -145,20 +149,27 @@
 
         <div class="container-fluid">
             <!-- main body of the html goes here -->
-                   <h2>All Tickets</h2>
+<h2>All Tickets</h2>
     <a href="{% url 'admin_home' %}">Back to Admin Home</a> | <a href="{% url 'admin_dashboard' %}">View Dashboard</a>
     {% if messages %}
         {% for message in messages %}
             <p style="color: {% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %};">{{ message }}</p>
         {% endfor %}
     {% endif %}
+    <div class="filter-form">
+        <form method="get">
+            {{ form.priority.label_tag }} {{ form.priority }}
+            {{ form.state.label_tag }} {{ form.state }}
+            <button type="submit">Apply Filters</button>
+        </form>
+    </div>
     {% if tickets %}
         <table>
             <tr>
                 <th>Name</th>
                 <th>Category</th>
-                <th>Priority</th>
-                <th>Status</th>
+                <th><a href="?sort_by={% if request.GET.sort_by == 'priority' %}-priority{% else %}priority{% endif %}{% for key, value in request.GET.items %}{% if key != 'sort_by' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Priority</a></th>
+                <th><a href="?sort_by={% if request.GET.sort_by == 'state' %}-state{% else %}state{% endif %}{% for key, value in request.GET.items %}{% if key != 'sort_by' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Status</a></th>
                 <th>Created</th>
                 <th>Creator</th>
                 <th>Assigned Agent</th>
@@ -200,8 +211,7 @@
     {% else %}
         <p>No tickets found.</p>
     {% endif %}
-
-        </div>
+            </div>
     </main>
     {% bootstrap_javascript %}
     <script>

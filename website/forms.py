@@ -103,3 +103,26 @@ class TicketCommentForm(forms.ModelForm):
         widgets = {
             'comment': forms.Textarea(attrs={'rows': 4, 'cols': 50}),
         }
+
+class TicketFilterForm(forms.Form):
+    PRIORITY_CHOICES = (
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('','All Priorities')
+    )
+    STATE_CHOICES = (
+        ('open', 'Open'),
+        ('in_progress', 'In Progress'),
+        ('closed', 'Closed'),
+        ('','All Statuses'),
+    )
+
+    priority = forms.ChoiceField(
+        choices=PRIORITY_CHOICES,
+        required=False
+    )
+    state = forms.ChoiceField(
+        choices=STATE_CHOICES,
+        required=False
+    )

@@ -12,24 +12,36 @@
         a:hover { text-decoration: underline; }
         .comments { margin-top: 10px; }
         .comment { border-top: 1px solid #eee; padding: 5px 0; }
+        .filter-form { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        .filter-form select { padding: 5px; }
+        .filter-form button { padding: 5px 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        .filter-form button:hover { background-color: #0056b3; }
     </style>
 </head>
 <body>
-    <h2>My Assigned Tickets</h2>
-    <a href="{% url 'assign_tickets' %}">Assign More Tickets</a> | <a href="{% url 'home' %}">Home</a>
+   <h2>My Assigned Tickets</h2>
+    <a href="{% url 'home' %}">Back to Home</a> | <a href="{% url 'dashboard' %}">View Dashboard</a>
     {% if messages %}
         {% for message in messages %}
-            <p style="color: {% if message.tags == 'success' %}green{% elif message.tags == 'info' %}blue{% else %}red{% endif %};">{{ message }}</p>
+            <p style="color: {% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %};">{{ message }}</p>
         {% endfor %}
     {% endif %}
+    <div class="filter-form">
+        <form method="get">
+            {{ form.priority.label_tag }} {{ form.priority }}
+            {{ form.state.label_tag }} {{ form.state }}
+            <button type="submit">Apply Filters</button>
+        </form>
+    </div>
     {% if tickets %}
         <table>
             <tr>
                 <th>Name</th>
                 <th>Category</th>
-                <th>Priority</th>
-                <th>Status</th>
+                <th><a href="?sort_by={% if request.GET.sort_by == 'priority' %}-priority{% else %}priority{% endif %}{% for key, value in request.GET.items %}{% if key != 'sort_by' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Priority</a></th>
+                <th><a href="?sort_by={% if request.GET.sort_by == 'state' %}-state{% else %}state{% endif %}{% for key, value in request.GET.items %}{% if key != 'sort_by' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Status</a></th>
                 <th>Created</th>
+                <th>Creator</th>
                 <th>Actions</th>
             </tr>
             {% for ticket in tickets %}
@@ -39,16 +51,17 @@
                     <td>{{ ticket.priority }}</td>
                     <td>{{ ticket.state }}</td>
                     <td>{{ ticket.creation_date|date:"Y-m-d H:i" }}</td>
+                    <td>{{ ticket.user.username }}</td>
                     <td>
                         {% if ticket.state in 'open,in_progress' %}
                             <a href="{% url 'resolve_ticket' ticket.id %}">Resolve</a> |
+                            <a href="{% url 'unassign_ticket' ticket.id %}">Unassign</a> |
                         {% endif %}
-                        <a href="{% url 'add_comment' ticket.id %}">Add Comment</a> |
-                        <a href="{% url 'unassign_ticket' ticket.id %}">Unassign</a>
+                        <a href="{% url 'add_comment' ticket.id %}">Comment</a>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="6" class="comments">
+                    <td colspan="7" class="comments">
                         {% for comment in ticket.comments.all %}
                             <div class="comment">
                                 <strong>{{ comment.agent.username }} ({{ comment.created_at|date:"Y-m-d H:i" }}):</strong>
@@ -62,7 +75,7 @@
             {% endfor %}
         </table>
     {% else %}
-        <p>No assigned tickets.</p>
+        <p>No assigned tickets found.</p>
     {% endif %}
-</body>
+    </body>
 </html>

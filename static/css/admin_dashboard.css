@@ -1,0 +1,161 @@
+/* Admin Dashboard Styles */
+:root {
+  --primary-blue: #007bff;
+  --dark-bg: #212529;
+  --card-bg: #ffffff;
+  --text-color: #333333;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  color: var(--text-color);
+}
+
+/* Main container adjustments */
+main {
+  display: flex;
+  flex-wrap: nowrap;
+  min-height: 100vh;
+  overflow-x: auto;
+}
+
+/* Sidebar (from global.css, slight tweaks) */
+.sidebar {
+  background-color: var(--dark-bg);
+  color: white;
+  padding: 1.5rem;
+  width: 280px;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+}
+
+.sidebar a {
+  color: white;
+  transition: color 0.2s ease;
+}
+
+.sidebar a:hover {
+  color: var(--primary-blue);
+}
+
+.sidebar .nav-link.active {
+  background-color: var(--primary-blue);
+  border-radius: 0.25rem;
+}
+
+/* Content area */
+.content {
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: #f8f9fa;
+}
+
+/* Dashboard header */
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+/* Chart container */
+.chart-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+/* Chart card */
+.chart {
+  background-color: var(--card-bg);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  transition: transform 0.2s ease;
+}
+
+.chart:hover {
+  transform: translateY(-5px);
+}
+
+.chart h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.chart img {
+  width: 100%;
+  height: auto;
+  border-radius: 0.25rem;
+}
+
+/* Metric card */
+.metric {
+  background-color: var(--card-bg);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.metric h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+.metric p {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-blue);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+
+  .dashboard-header {
+    font-size: 1.5rem;
+  }
+
+  .chart-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: fixed;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    transform: translateX(-100%);
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .content {
+    padding: 0.5rem;
+  }
+}
+
+svg.bi {
+    display: inline-flex !important;
+}

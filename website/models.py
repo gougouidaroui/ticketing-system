@@ -1,8 +1,9 @@
 from django.db import models
 from django.db.models.signals import post_delete, pre_save
-from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
+from django.contrib.auth.models import Group
+from django.dispatch import receiver
 from django.conf import settings
 
 
@@ -21,6 +22,14 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            normal_users_group = Group.objects.get(name='Normal Users')
+            self.groups.add(normal_users_group)
+
 
 @receiver(post_delete)
 def delete_files_when_row_deleted_from_db(sender, instance, **kwargs):

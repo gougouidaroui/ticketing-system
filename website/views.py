@@ -47,7 +47,7 @@ def register_view(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')  # Redirect to login page after successful registration
+            return redirect('login')
     else:
         form = SignUpForm()
     return render(request, 'register.html', {'form': form})
@@ -73,6 +73,7 @@ def dashboard_view(request):
     if request.user.is_superuser:
         return redirect('admin_dashboard')
     return redirect('agent_dashboard')
+
 @login_required
 def create_ticket(request):
     if not request.user.groups.filter(name='Normal Users').exists() and not request.user.is_superuser:
@@ -139,7 +140,6 @@ def assign_ticket(request, ticket_id):
             ticket.state = 'in_progress'
             ticket.save()
             messages.success(request, f"You have assigned ticket '{ticket.name}'.")
-            # Notify the ticket's creator
             messages.info(request, f"Your ticket '{ticket.name}' is now being handled by {request.user.username}.", extra_tags=f'for_user_{ticket.user.id}')
             return redirect('assign_tickets')
     else:
@@ -152,18 +152,15 @@ def agent_tickets(request):
         messages.error(request, "Only agents or admins can view assigned tickets.")
         return redirect('ticket_list')
 
-    # Initialize form with GET data
     form = TicketFilterForm(request.GET or None)
     tickets = Ticket.objects.filter(assigned_agent=request.user).select_related('category', 'user', 'assigned_agent')
 
-    # Apply filters
     if form.is_valid():
         if form.cleaned_data['priority']:
             tickets = tickets.filter(priority=form.cleaned_data['priority'])
         if form.cleaned_data['state']:
             tickets = tickets.filter(state=form.cleaned_data['state'])
 
-    # Apply sorting
     sort_by = request.GET.get('sort_by', '-creation_date')
     allowed_sort_fields = ['state', '-state', 'priority', '-priority']
     if sort_by in allowed_sort_fields:
@@ -237,7 +234,6 @@ def admin_dashboard(request):
     plt.savefig(line_chart_path)
     plt.close()
 
-    # Pie Chart: Tickets per category
     tickets_by_category = Ticket.objects.values('category__name').annotate(count=Count('id'))
     categories = [entry['category__name'] for entry in tickets_by_category]
     category_counts = [entry['count'] for entry in tickets_by_category]
@@ -248,7 +244,6 @@ def admin_dashboard(request):
     plt.savefig(pie_chart_path)
     plt.close()
 
-    # Bar Chart: Tickets resolved by agent
     resolved_by_agent = Ticket.objects.filter(state='closed').values('assigned_agent__username').annotate(count=Count('id'))
     agents = [entry['assigned_agent__username'] for entry in resolved_by_agent]
     agent_counts = [entry['count'] for entry in resolved_by_agent]
@@ -263,7 +258,6 @@ def admin_dashboard(request):
     plt.savefig(bar_chart_path)
     plt.close()
 
-    # Average Resolution Time
     resolved_tickets = Ticket.objects.filter(state='closed', resolution_date__isnull=False)
     avg_hours = 0
     if resolved_tickets.exists():
@@ -275,7 +269,6 @@ def admin_dashboard(request):
             count += 1
         avg_hours = round(total_seconds / 3600 / count, 2) if count > 0 else 0
 
-    # Stacked Bar Chart: Tickets by status and priority
     statuses = ['open', 'in_progress', 'closed']
     priorities = ['low', 'medium', 'high']
     data = {status: [] for status in statuses}
@@ -323,7 +316,6 @@ def agent_dashboard(request):
         messages.error(request, "Only agents or admins can access the agent dashboard.")
         return redirect('my_tickets')
 
-    # Pie Chart: Assigned tickets by category
     tickets_by_category = Ticket.objects.filter(assigned_agent=request.user).values('category__name').annotate(count=Count('id'))
     categories = [entry['category__name'] for entry in tickets_by_category]
     category_counts = [entry['count'] for entry in tickets_by_category]
@@ -344,7 +336,6 @@ def agent_dashboard(request):
             plt.close()
     generate_chart_if_needed(pie_chart_path, generate_pie_chart)
 
-    # Bar Chart: Tickets by status
     statuses = ['open', 'in_progress', 'closed']
     status_counts = [Ticket.objects.filter(assigned_agent=request.user, state=status).count() for status in statuses]
     bar_chart_path = os.path.join(settings.STATICFILES_DIRS[0], 'charts', f'agent_{request.user.username}_status.png')

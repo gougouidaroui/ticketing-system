@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from .models import CustomUser, Ticket, Category, TicketComment
 from django.conf import settings
 
+
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True)
     phone_number = forms.CharField(
@@ -79,6 +80,7 @@ class TicketForm(forms.ModelForm):
         self.fields['description'].label = 'description'
         self.fields['category'].label = 'category'
         self.fields['priority'].label = 'priority'
+        self.fields['state'].label = ''
 
     def clean_category(self):
         category_id = self.cleaned_data['category']

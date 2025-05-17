@@ -15,6 +15,7 @@ from django.db.models import Count, Avg
 from django.db.models.functions import TruncDate
 import os
 from django.conf import settings
+from django.core.mail import send_mail
 
 
 def is_agent(user):
@@ -180,6 +181,18 @@ def resolve_ticket(request, ticket_id):
         ticket.state = 'closed'
         ticket.resolution_date = timezone.now()
         ticket.save()
+        try:
+            send_mail(
+                subject=f"Votre ticket '{ticket.subject}' a été résolu",
+                message=f"Bonjour {ticket.user.username},\n\nVotre ticket '{ticket.subject}' a été résolu par l'agent {request.user.username}.\nDescription: {ticket.description}\n\nMerci,\nL'équipe de support",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[ticket.user.email],
+                fail_silently=False,
+            )
+            messages.success(request, "Ticket résolu et notification envoyée.")
+        except Exception as e:
+            messages.error(request, f"Ticket résolu, mais échec de l'envoi de l'email: {str(e)}")
+
         messages.success(request, f"Ticket '{ticket.name}' has been resolved.")
         messages.info(request, f"Your ticket '{ticket.name}' has been resolved by {request.user.username}.", extra_tags=f'for_user_{ticket.user.id}')
         return redirect('agent_tickets')
